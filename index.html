@@ -64,22 +64,35 @@
 <textarea id="diarioInput" placeholder="Escreva algo..."></textarea>
 <button onclick="saveDiario()">Salvar</button>
 
-<p><b>Último texto salvo:</b></p>
-<p id="lastDiario"></p>
+<div id="diarioList"></div>
 
 <script>
 function saveDiario() {
     let texto = document.getElementById('diarioInput').value;
-    localStorage.setItem("textoDiario", texto);
-    document.getElementById("lastDiario").innerText = texto;
+    if(texto.trim().length === 0) return;
+
+    let lista = JSON.parse(localStorage.getItem("textoDiarioLista")) || [];
+    lista.push(texto);
+    localStorage.setItem("textoDiarioLista", JSON.stringify(lista));
+
+    mostrarDiario();
+    document.getElementById('diarioInput').value = "";
 }
 
-window.onload = () => {
-    let saved = localStorage.getItem("textoDiario");
-    if(saved){
-        document.getElementById("lastDiario").innerText = saved;
-    }
+function mostrarDiario() {
+    let lista = JSON.parse(localStorage.getItem("textoDiarioLista")) || [];
+    let div = document.getElementById("diarioList");
+    div.innerHTML = "";
+
+    lista.forEach(item => {
+        let p = document.createElement("p");
+        p.textContent = "• " + item;
+        div.appendChild(p);
+    });
 }
+
+window.onload = mostrarDiario;
+</script>
 </script>
 
 </body>
