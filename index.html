@@ -1,1 +1,86 @@
 
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amigos da verdade</title>
+<style>
+    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
+    h1 { text-align: center; }
+    .grid {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 15px;
+        justify-content: center;
+    }
+    .card {
+        background: white;
+        border: 2px solid #333;
+        width: 150px;
+        height: 100px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-weight: bold;
+        border-radius: 10px;
+        cursor: pointer;
+        text-decoration: none;
+        color: black;
+    }
+    .card:hover { background: #e8e8e8; }
+    textarea {
+        width: 100%;
+        height: 200px;
+    }
+    button {
+        padding: 10px;
+        width: 100%;
+        margin-top: 10px;
+        cursor: pointer;
+    }
+</style>
+</head>
+<body>
+
+<h1>Amigos</h1>
+
+<div class="grid">
+    <a class="card" href="amigo1.html">Laudir</a>
+    <a class="card" href="amigo2.html">Bryan</a>
+    <a class="card" href="amigo3.html">Tomás</a>
+    <a class="card" href="amigo4.html">Victor</a>
+    <a class="card" href="amigo5.html">Gabriel</a>
+    <a class="card" href="amigo6.html">Leoniro</a>
+    <a class="card" href="amigo7.html">Áquila</a>
+    <a class="card" href="amigo8.html">Sem nome</a>
+    <a class="card" href="amigo9.html">Sem nome</a>
+    <a class="card" href="amigo10.html">Sem nome</a>
+</div>
+
+<hr><br>
+
+<h2>Texto Diário</h2>
+<textarea id="diarioInput" placeholder="Escreva algo..."></textarea>
+<button onclick="saveDiario()">Salvar</button>
+
+<p><b>Último texto salvo:</b></p>
+<p id="lastDiario"></p>
+
+<script>
+function saveDiario() {
+    let texto = document.getElementById('diarioInput').value;
+    localStorage.setItem("textoDiario", texto);
+    document.getElementById("lastDiario").innerText = texto;
+}
+
+window.onload = () => {
+    let saved = localStorage.getItem("textoDiario");
+    if(saved){
+        document.getElementById("lastDiario").innerText = saved;
+    }
+}
+</script>
+
+</body>
+</html>
