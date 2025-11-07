@@ -78,17 +78,31 @@ function salvarComentario(){
 
     if(nome.length == 0 || texto.length == 0) return;
 
-    // Comentário com nome + texto
+    // buscar lista no localStorage
     let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
-    
+
+    // adicionar comentário
     lista.push({ autor: nome, comentario: texto });
 
+    // guardar de volta
     localStorage.setItem("comentariosDiarios", JSON.stringify(lista));
 
     mostrarComentarios();
 
-    // limpa caixas
+    // limpar caixa
     document.getElementById("comentario").value = "";
+}
+
+function apagarComentario(index){
+    let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
+    
+    // remover comentário no índice clicado
+    lista.splice(index, 1);
+
+    // salvar novamente
+    localStorage.setItem("comentariosDiarios", JSON.stringify(lista));
+
+    mostrarComentarios();
 }
 
 function mostrarComentarios(){
@@ -96,14 +110,27 @@ function mostrarComentarios(){
     let div = document.getElementById("listaComentarios");
     div.innerHTML = "";
 
-    lista.forEach(item => {
+    lista.forEach((item, index) => {
         let box = document.createElement("div");
         box.style.background = "white";
         box.style.padding = "8px";
         box.style.marginTop = "6px";
         box.style.borderRadius = "6px";
+        box.style.display = "flex";
+        box.style.justifyContent = "space-between";
+        box.style.alignItems = "center";
 
-        box.innerHTML = "<b>" + item.autor + "</b>: " + item.comentario;
+        let texto = document.createElement("span");
+        texto.innerHTML = "<b>" + item.autor + "</b>: " + item.comentario;
+
+        let botao = document.createElement("button");
+        botao.textContent = "Apagar";
+        botao.style.padding = "5px 10px";
+        botao.style.marginLeft = "10px";
+        botao.onclick = () => apagarComentario(index);
+
+        box.appendChild(texto);
+        box.appendChild(botao);
         div.appendChild(box);
     });
 }
