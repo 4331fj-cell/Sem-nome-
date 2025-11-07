@@ -1,63 +1,223 @@
 
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Amigos da verdade</title>
+<title>Meu Site</title>
+
 <style>
-    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 20px; }
-    h1 { text-align: center; }
-    .grid {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 15px;
-        justify-content: center;
+    :root {
+        /* tema claro */
+        --fundo: #f0f4f8;
+        --caixa: #ffffff;
+        --texto: #1a1a1a;
+        --azul: #1a4d8f;
+        --comentario: #e9eef5;
+        --botaovermelho: #c62828;
     }
-    .card {
-        background: white;
-        border: 2px solid #333;
-        width: 150px;
-        height: 100px;
+
+    body.escuro {
+        /* tema escuro */
+        --fundo: #1b1e23;
+        --caixa: #2b2f36;
+        --texto: #f1f1f1;
+        --comentario: #3a3f48;
+    }
+
+    body {
+        font-family: Arial, Helvetica, sans-serif;
+        background: linear-gradient(135deg, var(--fundo), #d7e1ec);
+        margin: 0;
+        padding: 0;
+        color: var(--texto);
+        transition: 0.3s;
+    }
+
+    /* MENU */
+    nav {
+        background: var(--azul);
+        padding: 12px;
+        text-align: center;
+        color: white;
+        font-size: 20px;
         display: flex;
-        justify-content: center;
+        justify-content: space-around;
         align-items: center;
-        font-weight: bold;
-        border-radius: 10px;
-        cursor: pointer;
+    }
+
+    nav a {
+        color: white;
         text-decoration: none;
-        color: black;
+        font-weight: bold;
     }
-    .card:hover { background: #e8e8e8; }
-    textarea {
+
+    /* container principal */
+    .container {
+        max-width: 900px;
+        margin: auto;
+        background: var(--caixa);
+        padding: 25px;
+        margin-top: 30px;
+        border-radius: 12px;
+        box-shadow: 0 0 15px rgba(0,0,0,0.10);
+        animation: aparecer 0.6s ease;
+    }
+
+    @keyframes aparecer {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    h2 {
+        color: var(--azul);
+        border-bottom: 2px solid var(--azul);
+        padding-bottom: 5px;
+    }
+
+    input, textarea {
         width: 100%;
-        height: 200px;
-    }
-    button {
+        border: 1px solid #bbb;
+        border-radius: 6px;
         padding: 10px;
-        width: 100%;
-        margin-top: 10px;
+        margin-top: 8px;
+        margin-bottom: 10px;
+        font-size: 15px;
+    }
+
+    button {
+        background: var(--azul);
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 10px;
+        font-size: 15px;
         cursor: pointer;
+    }
+
+    button:hover {
+        background: #163e75;
+    }
+
+    .comentario {
+        background: var(--comentario);
+        padding: 12px;
+        border-radius: 8px;
+        margin-top: 10px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        animation: aparecer 0.4s ease;
+    }
+
+    .comentario button {
+        background: var(--botaovermelho);
+        padding: 6px 10px;
+        border-radius: 6px;
+    }
+
+    .comentario button:hover {
+        background: #8e1d1d;
+    }
+
+    /* botão modo escuro */
+    #modo {
+        cursor: pointer;
+        background: white;
+        color: black;
+        border-radius: 20px;
+        padding: 6px 12px;
+        border: none;
     }
 </style>
 </head>
 <body>
 
-<h1>Amigos</h1>
+<nav>
+    <a href="#">Home</a>
+    <a href="#">Amigos</a>
+    <a href="#">Comentários</a>
+    <a href="#">Contato</a>
+    <button id="modo" onclick="alternarTema()">Dark Mode</button>
+</nav>
 
-<div class="grid">
-    <a class="card" href="amigo1.html">Laudir</a>
-    <a class="card" href="amigo2.html">Bryan</a>
-    <a class="card" href="amigo3.html">Tomás</a>
-    <a class="card" href="amigo4.html">Victor</a>
-    <a class="card" href="amigo5.html">Gabriel</a>
-    <a class="card" href="amigo6.html">Leoniro</a>
-    <a class="card" href="amigo7.html">Áquila</a>
-    <a class="card" href="amigo8.html">António</a>
-    <a class="card" href="amigo9.html">Sem nome</a>
-    <a class="card" href="amigo10.html">Sem nome</a>
+<div class="container">
+
+    <h2>Comentários sobre o Texto Diário</h2>
+    <p>Leia o texto diário no site oficial:<br>
+    <a href="https://www.jw.org" target="_blank">Aceder ao texto diário oficial</a></p>
+
+    <input id="nome" type="text" placeholder="Seu nome">
+    <textarea id="comentario" placeholder="Escreva o seu comentário..."></textarea>
+    <button onclick="salvarComentario()">Publicar comentário</button>
+
+    <h3 style="margin-top:20px;">Comentários anteriores:</h3>
+    <div id="listaComentarios"></div>
+
 </div>
 
+<script>
+function salvarComentario(){
+    let nome = document.getElementById("nome").value.trim();
+    let texto = document.getElementById("comentario").value.trim();
+
+    if(nome.length == 0 || texto.length == 0) return;
+
+    let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
+
+    let data = new Date();
+    let dia = data.toLocaleDateString() + " " + data.toLocaleTimeString();
+
+    lista.push({ autor: nome, comentario: texto, data: dia });
+    localStorage.setItem("comentariosDiarios", JSON.stringify(lista));
+
+    mostrarComentarios();
+    document.getElementById("comentario").value = "";
+}
+
+function apagarComentario(index){
+    let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
+    let confirmar = confirm("Tem certeza que deseja apagar?");
+    if(!confirmar) return;
+
+    lista.splice(index, 1);
+    localStorage.setItem("comentariosDiarios", JSON.stringify(lista));
+    mostrarComentarios();
+}
+
+function mostrarComentarios(){
+    let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
+    let div = document.getElementById("listaComentarios");
+    div.innerHTML = "";
+
+    lista.forEach((item, index) => {
+        let box = document.createElement("div");
+        box.className = "comentario";
+
+        let texto = document.createElement("span");
+        texto.innerHTML = "<b>" + item.autor + ":</b> " + item.comentario + 
+                          "<br><small>" + item.data + "</small>";
+
+        let botao = document.createElement("button");
+        botao.textContent = "Apagar";
+        botao.onclick = () => apagarComentario(index);
+
+        box.appendChild(texto);
+        box.appendChild(botao);
+        div.appendChild(box);
+    });
+}
+
+function alternarTema(){
+    document.body.classList.toggle("escuro");
+    let botao = document.getElementById("modo");
+    botao.textContent = document.body.classList.contains("escuro") ? "Light Mode" : "Dark Mode";
+}
+
+window.onload = mostrarComentarios;
+</script>
+
+</body>
+</html>
 <hr><br>
 
 <h2>Comentários sobre o Texto Diário</h2>
