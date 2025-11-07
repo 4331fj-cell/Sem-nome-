@@ -1,14 +1,12 @@
-
 <!DOCTYPE html>
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
-<title>Meu Site</title>
+<title>Amigos da BBS</title>
 
 <style>
     :root {
-        /* tema claro */
-        --fundo: #f0f4f8;
+        --fundo: #ffffff;
         --caixa: #ffffff;
         --texto: #1a1a1a;
         --azul: #1a4d8f;
@@ -16,42 +14,30 @@
         --botaovermelho: #c62828;
     }
 
-    body.escuro {
-        /* tema escuro */
-        --fundo: #1b1e23;
-        --caixa: #2b2f36;
-        --texto: #f1f1f1;
-        --comentario: #3a3f48;
-    }
-
     body {
         font-family: Arial, Helvetica, sans-serif;
-        background: linear-gradient(135deg, var(--fundo), #d7e1ec);
+        background: linear-gradient(#ffffff, #e5edf7); /* estilo jw.org */
         margin: 0;
         padding: 0;
         color: var(--texto);
         transition: 0.3s;
     }
 
-    /* MENU */
     nav {
         background: var(--azul);
         padding: 12px;
-        text-align: center;
-        color: white;
-        font-size: 20px;
         display: flex;
-        justify-content: space-around;
-        align-items: center;
+        justify-content: center;
+        gap: 25px;
     }
 
     nav a {
         color: white;
         text-decoration: none;
         font-weight: bold;
+        cursor: pointer;
     }
 
-    /* container principal */
     .container {
         max-width: 900px;
         margin: auto;
@@ -60,7 +46,7 @@
         margin-top: 30px;
         border-radius: 12px;
         box-shadow: 0 0 15px rgba(0,0,0,0.10);
-        animation: aparecer 0.6s ease;
+        animation: aparecer 0.5s ease;
     }
 
     @keyframes aparecer {
@@ -68,34 +54,27 @@
         to { opacity: 1; transform: translateY(0); }
     }
 
-    h2 {
-        color: var(--azul);
-        border-bottom: 2px solid var(--azul);
-        padding-bottom: 5px;
+    h2 { color: var(--azul); }
+
+    .amigo-box {
+        background: #e9eef5;
+        padding: 12px;
+        border-radius: 8px;
+        margin-top: 8px;
     }
 
-    input, textarea {
+    input, textarea, button {
         width: 100%;
-        border: 1px solid #bbb;
         border-radius: 6px;
         padding: 10px;
         margin-top: 8px;
-        margin-bottom: 10px;
-        font-size: 15px;
     }
 
     button {
         background: var(--azul);
         color: white;
         border: none;
-        border-radius: 6px;
-        padding: 10px;
-        font-size: 15px;
         cursor: pointer;
-    }
-
-    button:hover {
-        background: #163e75;
     }
 
     .comentario {
@@ -106,194 +85,165 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        animation: aparecer 0.4s ease;
     }
 
     .comentario button {
         background: var(--botaovermelho);
-        padding: 6px 10px;
-        border-radius: 6px;
-    }
-
-    .comentario button:hover {
-        background: #8e1d1d;
-    }
-
-    /* botão modo escuro */
-    #modo {
-        cursor: pointer;
-        background: white;
-        color: black;
-        border-radius: 20px;
-        padding: 6px 12px;
-        border: none;
+        width: auto;
     }
 </style>
 </head>
 <body>
 
 <nav>
-    <a href="#">Home</a>
-    <a href="#">Amigos</a>
-    <a href="#">Comentários</a>
-    <a href="#">Contato</a>
-    <button id="modo" onclick="alternarTema()">Dark Mode</button>
+    <a onclick="mostrarHome()">Home</a>
+    <a onclick="mostrarAmigos()">Amigos</a>
+    <a onclick="mostrarComentarios()">Comentários</a>
 </nav>
 
 <div class="container">
 
-    <h2>Comentários sobre o Texto Diário</h2>
-    <p>Leia o texto diário no site oficial:<br>
-    <a href="https://www.jw.org" target="_blank">Aceder ao texto diário oficial</a></p>
+    <!-- HOME: amigos + comentários -->
+    <div id="sec_home">
 
-    <input id="nome" type="text" placeholder="Seu nome">
-    <textarea id="comentario" placeholder="Escreva o seu comentário..."></textarea>
-    <button onclick="salvarComentario()">Publicar comentário</button>
+        <h2>Amigos</h2>
+        <div id="lista_amigos"></div>
 
-    <h3 style="margin-top:20px;">Comentários anteriores:</h3>
-    <div id="listaComentarios"></div>
+        <hr><br>
+
+        <h2>Comentários sobre o Texto Diário</h2>
+        <p>Leia no site oficial: <a href="https://www.jw.org" target="_blank">Aceder</a></p>
+
+        <input id="nome" type="text" placeholder="Seu nome">
+        <textarea id="comentario" placeholder="Escreva o seu comentário..."></textarea>
+        <button onclick="salvarComentario()">Publicar comentário</button>
+
+        <h3>Comentários anteriores:</h3>
+        <div id="listaComentarios"></div>
+    </div>
+
+    <!-- SOMENTE AMIGOS -->
+    <div id="sec_amigos" style="display:none;">
+        <h2>Amigos</h2>
+        <div id="lista_amigos2"></div>
+    </div>
+
+    <!-- SOMENTE COMENTÁRIOS -->
+    <div id="sec_comentarios" style="display:none;">
+        <h2>Comentários sobre o Texto Diário</h2>
+        <input id="nome2" type="text" placeholder="Seu nome">
+        <textarea id="comentario2" placeholder="Escreva o seu comentário..."></textarea>
+        <button onclick="salvarComentario2()">Publicar comentário</button>
+        <h3>Comentários anteriores:</h3>
+        <div id="listaComentarios2"></div>
+    </div>
 
 </div>
 
 <script>
+// --------- LISTA DE AMIGOS (editável) ---------
+const amigos = [
+    "Laudir",
+    "Bryan",
+    "Tomás",
+    "Victor",
+    "Gabriel",
+    "Leoniro",
+    "Áquila",
+    "António"
+];
+
+function mostrarAmigosLista(id){
+    let div = document.getElementById(id);
+    div.innerHTML = "";
+
+    amigos.forEach(nome => {
+        let box = document.createElement("div");
+        box.className = "amigo-box";
+        box.innerHTML = nome;
+        div.appendChild(box);
+    });
+}
+
+// --------- COMENTÁRIOS ---------
 function salvarComentario(){
     let nome = document.getElementById("nome").value.trim();
     let texto = document.getElementById("comentario").value.trim();
-
-    if(nome.length == 0 || texto.length == 0) return;
+    if(!nome || !texto) return;
 
     let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
-
-    let data = new Date();
-    let dia = data.toLocaleDateString() + " " + data.toLocaleTimeString();
-
-    lista.push({ autor: nome, comentario: texto, data: dia });
+    lista.push({autor:nome, comentario:texto});
     localStorage.setItem("comentariosDiarios", JSON.stringify(lista));
 
     mostrarComentarios();
     document.getElementById("comentario").value = "";
 }
 
-function apagarComentario(index){
-    let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
-    let confirmar = confirm("Tem certeza que deseja apagar?");
-    if(!confirmar) return;
+function salvarComentario2(){
+    let nome = document.getElementById("nome2").value.trim();
+    let texto = document.getElementById("comentario2").value.trim();
+    if(!nome || !texto) return;
 
-    lista.splice(index, 1);
+    let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
+    lista.push({autor:nome, comentario:texto});
+    localStorage.setItem("comentariosDiarios", JSON.stringify(lista));
+
+    mostrarComentarios();
+    document.getElementById("comentario2").value = "";
+}
+
+function apagarComentario(i){
+    let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
+    lista.splice(i,1);
     localStorage.setItem("comentariosDiarios", JSON.stringify(lista));
     mostrarComentarios();
 }
 
 function mostrarComentarios(){
     let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
-    let div = document.getElementById("listaComentarios");
-    div.innerHTML = "";
+    let div1 = document.getElementById("listaComentarios");
+    let div2 = document.getElementById("listaComentarios2");
+    
+    div1.innerHTML = "";
+    div2.innerHTML = "";
 
-    lista.forEach((item, index) => {
+    lista.forEach((item, i) => {
         let box = document.createElement("div");
         box.className = "comentario";
-
-        let texto = document.createElement("span");
-        texto.innerHTML = "<b>" + item.autor + ":</b> " + item.comentario + 
-                          "<br><small>" + item.data + "</small>";
-
-        let botao = document.createElement("button");
-        botao.textContent = "Apagar";
-        botao.onclick = () => apagarComentario(index);
-
-        box.appendChild(texto);
-        box.appendChild(botao);
-        div.appendChild(box);
+        box.innerHTML = `<span><b>${item.autor}:</b> ${item.comentario}</span>
+                         <button onclick="apagarComentario(${i})">Apagar</button>`;
+        div1.appendChild(box);
+        
+        let box2 = box.cloneNode(true);
+        div2.appendChild(box2);
     });
 }
 
-function alternarTema(){
-    document.body.classList.toggle("escuro");
-    let botao = document.getElementById("modo");
-    botao.textContent = document.body.classList.contains("escuro") ? "Light Mode" : "Dark Mode";
+// --------- TROCA DE ABAS ---------
+function mostrarHome(){
+    document.getElementById("sec_home").style.display = "block";
+    document.getElementById("sec_amigos").style.display = "none";
+    document.getElementById("sec_comentarios").style.display = "none";
 }
 
-window.onload = mostrarComentarios;
+function mostrarAmigos(){
+    document.getElementById("sec_home").style.display = "none";
+    document.getElementById("sec_amigos").style.display = "block";
+    document.getElementById("sec_comentarios").style.display = "none";
+}
+
+function mostrarComentarios(){
+    document.getElementById("sec_home").style.display = "none";
+    document.getElementById("sec_amigos").style.display = "none";
+    document.getElementById("sec_comentarios").style.display = "block";
+}
+
+window.onload = () => {
+    mostrarAmigosLista("lista_amigos");
+    mostrarAmigosLista("lista_amigos2");
+    mostrarComentarios();
+};
 </script>
 
 </body>
 </html>
-<hr><br>
-
-<h2>Comentários sobre o Texto Diário</h2>
-<p>Leia o texto diário no site oficial:<br>
-<a href="https://www.jw.org" target="_blank">Aceder ao texto diário oficial</a></p>
-
-<input id="nome" type="text" placeholder="Seu nome" style="width:100%; padding:8px; margin-bottom:8px;">
-<textarea id="comentario" placeholder="Escreva o seu comentário aqui..." style="width:100%; height:120px;"></textarea>
-<button onclick="salvarComentario()" style="width:100%; padding:10px; margin-top:5px;">Publicar</button>
-
-<h3>Comentários anteriores:</h3>
-<div id="listaComentarios"></div>
-
-<script>
-function salvarComentario(){
-    let nome = document.getElementById("nome").value.trim();
-    let texto = document.getElementById("comentario").value.trim();
-
-    if(nome.length == 0 || texto.length == 0) return;
-
-    // buscar lista no localStorage
-    let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
-
-    // adicionar comentário
-    lista.push({ autor: nome, comentario: texto });
-
-    // guardar de volta
-    localStorage.setItem("comentariosDiarios", JSON.stringify(lista));
-
-    mostrarComentarios();
-
-    // limpar caixa
-    document.getElementById("comentario").value = "";
-}
-
-function apagarComentario(index){
-    let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
-    
-    // remover comentário no índice clicado
-    lista.splice(index, 1);
-
-    // salvar novamente
-    localStorage.setItem("comentariosDiarios", JSON.stringify(lista));
-
-    mostrarComentarios();
-}
-
-function mostrarComentarios(){
-    let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
-    let div = document.getElementById("listaComentarios");
-    div.innerHTML = "";
-
-    lista.forEach((item, index) => {
-        let box = document.createElement("div");
-        box.style.background = "white";
-        box.style.padding = "8px";
-        box.style.marginTop = "6px";
-        box.style.borderRadius = "6px";
-        box.style.display = "flex";
-        box.style.justifyContent = "space-between";
-        box.style.alignItems = "center";
-
-        let texto = document.createElement("span");
-        texto.innerHTML = "<b>" + item.autor + "</b>: " + item.comentario;
-
-        let botao = document.createElement("button");
-        botao.textContent = "Apagar";
-        botao.style.padding = "5px 10px";
-        botao.style.marginLeft = "10px";
-        botao.onclick = () => apagarComentario(index);
-
-        box.appendChild(texto);
-        box.appendChild(botao);
-        div.appendChild(box);
-    });
-}
-
-window.onload = mostrarComentarios;
-</script>
