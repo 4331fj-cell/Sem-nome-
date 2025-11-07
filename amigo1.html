@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Laudir</title>
+</head>
+<body>
+<h1>Página do Laudir</h1>
+<p>Escreve o que quiser aqui:</p>
+<textarea style="width:100%; height:200px;" id="texto"></textarea>
+<button onclick="save()">Guardar</button>
+<p><b>Última mensagem:</b></p>
+<p id="msg"></p>
+
+<script>
+function save(){
+    const t = document.getElementById("texto").value;
+    localStorage.setItem("msg_Laudir", t);
+    document.getElementById("msg").innerText = t;
+}
+window.onload = () =>{
+    let saved = localStorage.getItem("msg_joao");
+    if(saved){ document.getElementById("msg").innerText = saved; }
+}
+</script>
+</body>
+</html>
