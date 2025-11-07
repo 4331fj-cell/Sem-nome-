@@ -150,9 +150,12 @@ const amigos = [
     "Gabriel",
     "Leoniro",
     "Áquila",
-    "António"
+    "António",
+    "Sem nome",
+    "Sem nome"
 ];
 
+// Mostrar lista com botões
 function mostrarAmigosLista(id){
     let div = document.getElementById(id);
     div.innerHTML = "";
@@ -160,12 +163,77 @@ function mostrarAmigosLista(id){
     amigos.forEach(nome => {
         let box = document.createElement("div");
         box.className = "amigo-box";
-        box.innerHTML = nome;
+        box.innerHTML = `
+            ${nome}
+            <button style="float:right; padding:5px;" onclick="abrirMensagens('${nome}')">Abrir</button>
+        `;
         div.appendChild(box);
     });
 }
 
-// --------- COMENTÁRIOS ---------
+// --------- ÁREA DE MENSAGENS DE CADA AMIGO ---------
+
+function abrirMensagens(nome) {
+    const container = document.querySelector(".container");
+
+    container.innerHTML = `
+        <h2>Mensagens de ${nome}</h2>
+        
+        <textarea id="msgTexto" placeholder="Escreve uma mensagem..."></textarea>
+        <button onclick="guardarMensagem('${nome}')">Guardar</button>
+
+        <h3>Mensagens anteriores:</h3>
+        <div id="lista_msg"></div>
+
+        <br><button onclick="voltarHome()">Voltar</button>
+    `;
+
+    mostrarMensagens(nome);
+}
+
+function guardarMensagem(nome){
+    let texto = document.getElementById("msgTexto").value.trim();
+    if(!texto) return;
+
+    let chave = "mensagens_" + nome; 
+    let lista = JSON.parse(localStorage.getItem(chave)) || [];
+    lista.push(texto);
+    localStorage.setItem(chave, JSON.stringify(lista));
+
+    document.getElementById("msgTexto").value = "";
+    mostrarMensagens(nome);
+}
+
+function mostrarMensagens(nome){
+    let chave = "mensagens_" + nome;
+    let lista = JSON.parse(localStorage.getItem(chave)) || [];
+    let div = document.getElementById("lista_msg");
+    div.innerHTML = "";
+
+    lista.forEach((texto, i) => {
+        let box = document.createElement("div");
+        box.className = "comentario";
+        box.innerHTML = `
+            <span>${texto}</span>
+            <button onclick="apagarMsg('${nome}', ${i})">Apagar</button>
+        `;
+        div.appendChild(box);
+    });
+}
+
+function apagarMsg(nome, index){
+    let chave = "mensagens_" + nome;
+    let lista = JSON.parse(localStorage.getItem(chave)) || [];
+    lista.splice(index,1);
+    localStorage.setItem(chave, JSON.stringify(lista));
+    mostrarMensagens(nome);
+}
+
+function voltarHome(){
+    window.location.reload();
+}
+
+// --------- COMENTÁRIOS GERAIS ---------
 function salvarComentario(){
     let nome = document.getElementById("nome").value.trim();
     let texto = document.getElementById("comentario").value.trim();
