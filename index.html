@@ -120,43 +120,33 @@
     </div>
 
     <!-- SOMENTE COMENTÁRIOS -->
-  <h2>Comentários sobre o Texto Diário</h2>
+ <h2>Comentários sobre o Texto Diário</h2>
 <p>Leia o texto diário no site oficial:<br>
 <a href="https://www.jw.org" target="_blank">Aceder ao texto diário oficial</a></p>
 
 <textarea id="comentario" placeholder="Escreva o seu comentário aqui..."></textarea>
-<button onclick="salvarComentario()">Publicar</button>
+<button id="btnPublicar">Publicar</button>
 
 <div id="listaComentarios"></div>
 
-<script>
-function salvarComentario(){
-    let texto = document.getElementById("comentario").value;
-    if(texto.trim().length == 0) return;
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
 
-    let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
-    lista.push(texto);
-    localStorage.setItem("comentariosDiarios", JSON.stringify(lista));
-    mostrarComentarios();
-    document.getElementById("comentario").value = "";
-}
 
-function mostrarComentarios(){
-    let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
-    let div = document.getElementById("listaComentarios");
+  // 👀 Mostrar comentários em tempo real
+  const q = query(comentariosRef, orderBy("data", "asc"));
+  onSnapshot(q, snapshot => {
+    const div = document.getElementById("listaComentarios");
     div.innerHTML = "";
-    lista.forEach(c => {
-        let p = document.createElement("p");
-        p.textContent = "• " + c;
-        div.appendChild(p);
+    snapshot.forEach(doc => {
+      const c = doc.data();
+      const p = document.createElement("p");
+      p.textContent = "• " + c.texto;
+      div.appendChild(p);
     });
-}
-
-window.onload = mostrarComentarios;
+  });
 </script>
-    </div>
-
-</div>
 
 <script>
 // --------- LISTA DE AMIGOS (editável) ---------
