@@ -111,40 +111,6 @@
 
         <hr><br>
 
-        <h2>Comentários sobre o Texto Diário</h2>
-<p>Leia o texto diário no site oficial:<br>
-<a href="https://www.jw.org" target="_blank">Aceder ao texto diário oficial</a></p>
-
-<textarea id="comentario" placeholder="Escreva o seu comentário aqui..."></textarea>
-<button onclick="salvarComentario()">Publicar</button>
-
-<div id="listaComentarios"></div>
-
-<script>
-function salvarComentario(){
-    let texto = document.getElementById("comentario").value;
-    if(texto.trim().length == 0) return;
-
-    let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
-    lista.push(texto);
-    localStorage.setItem("comentariosDiarios", JSON.stringify(lista));
-    mostrarComentarios();
-    document.getElementById("comentario").value = "";
-}
-
-function mostrarComentarios(){
-    let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
-    let div = document.getElementById("listaComentarios");
-    div.innerHTML = "";
-    lista.forEach(c => {
-        let p = document.createElement("p");
-        p.textContent = "• " + c;
-        div.appendChild(p);
-    });
-}
-
-window.onload = mostrarComentarios;
-</script>
     </div>
 
     <!-- SOMENTE AMIGOS -->
