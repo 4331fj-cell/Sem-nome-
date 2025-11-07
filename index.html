@@ -112,14 +112,39 @@
         <hr><br>
 
         <h2>Comentários sobre o Texto Diário</h2>
-        <p>Leia no site oficial: <a href="https://www.jw.org" target="_blank">Aceder</a></p>
+<p>Leia o texto diário no site oficial:<br>
+<a href="https://www.jw.org" target="_blank">Aceder ao texto diário oficial</a></p>
 
-        <input id="nome" type="text" placeholder="Seu nome">
-        <textarea id="comentario" placeholder="Escreva o seu comentário..."></textarea>
-        <button onclick="salvarComentario()">Publicar comentário</button>
+<textarea id="comentario" placeholder="Escreva o seu comentário aqui..."></textarea>
+<button onclick="salvarComentario()">Publicar</button>
 
-        <h3>Comentários anteriores:</h3>
-        <div id="listaComentarios"></div>
+<div id="listaComentarios"></div>
+
+<script>
+function salvarComentario(){
+    let texto = document.getElementById("comentario").value;
+    if(texto.trim().length == 0) return;
+
+    let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
+    lista.push(texto);
+    localStorage.setItem("comentariosDiarios", JSON.stringify(lista));
+    mostrarComentarios();
+    document.getElementById("comentario").value = "";
+}
+
+function mostrarComentarios(){
+    let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
+    let div = document.getElementById("listaComentarios");
+    div.innerHTML = "";
+    lista.forEach(c => {
+        let p = document.createElement("p");
+        p.textContent = "• " + c;
+        div.appendChild(p);
+    });
+}
+
+window.onload = mostrarComentarios;
+</script>
     </div>
 
     <!-- SOMENTE AMIGOS -->
@@ -129,13 +154,40 @@
     </div>
 
     <!-- SOMENTE COMENTÁRIOS -->
-    <div id="sec_comentarios" style="display:none;">
-        <h2>Comentários sobre o Texto Diário</h2>
-        <input id="nome2" type="text" placeholder="Seu nome">
-        <textarea id="comentario2" placeholder="Escreva o seu comentário..."></textarea>
-        <button onclick="salvarComentario2()">Publicar comentário</button>
-        <h3>Comentários anteriores:</h3>
-        <div id="listaComentarios2"></div>
+  <h2>Comentários sobre o Texto Diário</h2>
+<p>Leia o texto diário no site oficial:<br>
+<a href="https://www.jw.org" target="_blank">Aceder ao texto diário oficial</a></p>
+
+<textarea id="comentario" placeholder="Escreva o seu comentário aqui..."></textarea>
+<button onclick="salvarComentario()">Publicar</button>
+
+<div id="listaComentarios"></div>
+
+<script>
+function salvarComentario(){
+    let texto = document.getElementById("comentario").value;
+    if(texto.trim().length == 0) return;
+
+    let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
+    lista.push(texto);
+    localStorage.setItem("comentariosDiarios", JSON.stringify(lista));
+    mostrarComentarios();
+    document.getElementById("comentario").value = "";
+}
+
+function mostrarComentarios(){
+    let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
+    let div = document.getElementById("listaComentarios");
+    div.innerHTML = "";
+    lista.forEach(c => {
+        let p = document.createElement("p");
+        p.textContent = "• " + c;
+        div.appendChild(p);
+    });
+}
+
+window.onload = mostrarComentarios;
+</script>
     </div>
 
 </div>
