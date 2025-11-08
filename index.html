@@ -78,13 +78,13 @@
   <!-- Aba Amigos -->
   <div id="tabAmigos" class="tab active">
     <h2>Lista de Amigos</h2>
-    <div id="listaAmigos"></div>
+<div id="listaAmigos" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap:10px;"></div>
 
-    <h3>Adicionar novo amigo</h3>
-    <input type="text" id="novoNome" placeholder="Nome do amigo" />
-    <button onclick="adicionarAmigo()">Adicionar</button>
-
-    <div id="perfilAmigo" style="display:none; margin-top:20px;">
+<div id="perfilAmigo" style="display:none; margin-top:20px;">
+  <h3 id="perfilNome"></h3>
+  <textarea id="perfilTexto" rows="4" placeholder="Escreva algo sobre você..."></textarea>
+  <button onclick="salvarPerfil()">Salvar</button>
+</div> style="display:none; margin-top:20px;">
       <h3 id="perfilNome"></h3>
       <textarea id="perfilTexto" rows="4" placeholder="Escreva algo sobre você..."></textarea>
       <button onclick="salvarPerfil()">Salvar</button>
@@ -103,13 +103,13 @@
     // Configuração do Firebase
 // 1. Substitua com as chaves do seu projeto Firebase
 const firebaseConfig = {
-  apiKey: "AIzaSyB72aG4EcSHVrwnXK36uF9qJsfTvOfR9lw",
-  authDomain: "meus-amigos-site.firebaseapp.com",
-  projectId: "meus-amigos-site",
-  storageBucket: "meus-amigos-site.firebasestorage.app",
-  messagingSenderId: "1000729709619",
-  appId: "1:1000729709619:web:1ace7b814a12f65f2c6746",
-  measurementId: "G-Q3DB1WBKLW"
+  apiKey: "SUA_API_KEY",
+  authDomain: "SEU_AUTH_DOMAIN",
+  databaseURL: "SEU_DATABASE_URL",
+  projectId: "SEU_PROJECT_ID",
+  storageBucket: "SEU_STORAGE_BUCKET",
+  messagingSenderId: "SEU_MSG_SENDER_ID",
+  appId: "SEU_APP_ID"
 };
 
 // Inicializar Firebase
