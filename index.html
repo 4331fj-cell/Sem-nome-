@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <title>Amigos da Verdade</title>
-
 <style>
     :root {
         --fundo: #f0f4f8;
@@ -90,9 +89,16 @@
         cursor: pointer;
     }
 
-    button:hover {
-        background: #163e75;
+    button:hover { background: #163e75; }
+
+    .amigo {
+        background: var(--comentario);
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 10px;
     }
+
+    .amigo h4 { margin: 0 0 8px 0; color: var(--azul); }
 
     .comentario {
         background: var(--comentario);
@@ -103,16 +109,6 @@
         justify-content: space-between;
         align-items: center;
         animation: aparecer 0.4s ease;
-    }
-
-    .comentario button {
-        background: var(--botaovermelho);
-        padding: 6px 10px;
-        border-radius: 6px;
-    }
-
-    .comentario button:hover {
-        background: #8e1d1d;
     }
 
     #modo {
@@ -126,18 +122,6 @@
 
     .secao { display: none; }
     .ativa { display: block; }
-
-    .amigo {
-        background: var(--comentario);
-        border-radius: 10px;
-        padding: 15px;
-        margin-top: 10px;
-    }
-
-    .amigo h4 {
-        margin: 0 0 8px 0;
-        color: var(--azul);
-    }
 </style>
 </head>
 <body>
@@ -152,13 +136,13 @@
 
     <!-- Seção Amigos -->
     <div id="amigos" class="secao ativa">
-        <h2>Meus Amigos</h2>
+        <h2>Amigos da Verdade</h2>
         <div id="listaAmigos"></div>
-        <input id="novoAmigo" type="text" placeholder="Nome do novo amigo">
-        <button onclick="adicionarAmigo()">Adicionar Amigo</button>
+        <h3>Comentários dos Amigos:</h3>
+        <div id="comentariosAmigos"></div>
     </div>
 
-    <!-- Seção Comentários -->
+    <!-- Seção Comentários sobre o texto diário -->
     <div id="comentarios" class="secao">
         <h2>Comentários sobre o Texto Diário</h2>
         <p>Leia o texto diário no site oficial:<br>
@@ -174,128 +158,132 @@
 
 </div>
 
-<!-- SDKs do Firebase -->
+<!-- Firebase -->
 <script type="module">
-    // Importa os módulos necessários do Firebase (versão modular moderna)
-    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
-    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+import { 
+    getFirestore, collection, addDoc, doc, updateDoc, onSnapshot, query, orderBy 
+} from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-    // CONFIGURAÇÃO DO FIREBASE  🔥 (substitua pelos seus dados)
-   const firebaseConfig = {
-  apiKey: "AIzaSyB72aG4EcSHVrwnXK36uF9qJsfTvOfR9lw",
-  authDomain: "meus-amigos-site.firebaseapp.com",
-  projectId: "meus-amigos-site",
-  storageBucket: "meus-amigos-site.firebasestorage.app",
-  messagingSenderId: "1000729709619",
-  appId: "1:1000729709619:web:1ace7b814a12f65f2c6746",
-  measurementId: "G-Q3DB1WBKLW"
+// Configuração Firebase 🔥
+const firebaseConfig = {
+    apiKey: "AIzaSyB72aG4EcSHVrwnXK36uF9qJsfTvOfR9lw",
+    authDomain: "meus-amigos-site.firebaseapp.com",
+    projectId: "meus-amigos-site",
+    storageBucket: "meus-amigos-site.firebasestorage.app",
+    messagingSenderId: "1000729709619",
+    appId: "1:1000729709619:web:1ace7b814a12f65f2c6746",
+    measurementId: "G-Q3DB1WBKLW"
 };
 
-    // Inicializa Firebase e Firestore
-    const app = initializeApp(firebaseConfig);
-    const db = getFirestore(app);
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-    /* ======== FUNÇÕES DO SITE ======== */
+// Alternar tema
+window.alternarTema = function(){
+    document.body.classList.toggle("escuro");
+    let botao = document.getElementById("modo");
+    botao.textContent = document.body.classList.contains("escuro") ? "Light Mode" : "Dark Mode";
+}
 
-    // alternar entre as seções
-    window.mostrarSecao = function(id){
-        document.querySelectorAll(".secao").forEach(sec => sec.classList.remove("ativa"));
-        document.getElementById(id).classList.add("ativa");
+// Mostrar seções
+window.mostrarSecao = function(id){
+    document.querySelectorAll(".secao").forEach(s => s.classList.remove("ativa"));
+    document.getElementById(id).classList.add("ativa");
+}
+
+/* ======== AMIGOS ======== */
+const amigosFixos = ["Áquila", "Leoniro", "António", "Victor", "Bryan", "Tomás"];
+
+// Criar amigos se não existirem
+async function inicializarAmigos() {
+    const q = query(collection(db, "amigos"));
+    const amigosRef = collection(db, "amigos");
+    let existentes = [];
+    onSnapshot(q, snapshot => existentes = snapshot.docs.map(d => d.data().nome));
+
+    for (const nome of amigosFixos) {
+        if (!existentes.includes(nome)) {
+            await addDoc(amigosRef, { nome, comentario: "" });
+        }
     }
+}
 
-    // modo escuro
-    window.alternarTema = function(){
-        document.body.classList.toggle("escuro");
-        let botao = document.getElementById("modo");
-        botao.textContent = document.body.classList.contains("escuro") ? "Light Mode" : "Dark Mode";
-    }
+// Mostrar amigos com campo de comentário
+function mostrarAmigos() {
+    const listaDiv = document.getElementById("listaAmigos");
+    const comentariosDiv = document.getElementById("comentariosAmigos");
+    const q = query(collection(db, "amigos"), orderBy("nome"));
+    onSnapshot(q, (snapshot) => {
+        listaDiv.innerHTML = "";
+        comentariosDiv.innerHTML = "";
 
-    /* ---------- SEÇÃO DE COMENTÁRIOS (Firebase) ---------- */
+        snapshot.forEach(docSnap => {
+            const amigo = docSnap.data();
 
-    async function salvarComentario(){
-        const nome = document.getElementById("nome").value.trim();
-        const texto = document.getElementById("comentario").value.trim();
-        if(!nome || !texto) return alert("Preencha todos os campos!");
-
-        await addDoc(collection(db, "comentarios"), {
-            autor: nome,
-            comentario: texto,
-            data: new Date().toLocaleString()
-        });
-
-        document.getElementById("comentario").value = "";
-    }
-    window.salvarComentario = salvarComentario;
-
-    async function apagarComentario(id){
-        if(!confirm("Tem certeza que deseja apagar?")) return;
-        await deleteDoc(doc(db, "comentarios", id));
-    }
-
-    function mostrarComentarios(){
-        const div = document.getElementById("listaComentarios");
-        const q = query(collection(db, "comentarios"), orderBy("data"));
-        onSnapshot(q, (snapshot) => {
-            div.innerHTML = "";
-            snapshot.forEach((docSnap) => {
-                const item = docSnap.data();
-                const box = document.createElement("div");
-                box.className = "comentario";
-                const texto = document.createElement("span");
-                texto.innerHTML = `<b>${item.autor}:</b> ${item.comentario}<br><small>${item.data}</small>`;
-                const botao = document.createElement("button");
-                botao.textContent = "Apagar";
-                botao.onclick = () => apagarComentario(docSnap.id);
-                box.appendChild(texto);
-                box.appendChild(botao);
-                div.appendChild(box);
-            });
-        });
-    }
-
-    /* ---------- SEÇÃO AMIGOS (ainda local) ---------- */
-
-    function adicionarAmigo(){
-        let nome = document.getElementById("novoAmigo").value.trim();
-        if(nome.length === 0) return;
-        let amigos = JSON.parse(localStorage.getItem("amigosLista")) || [];
-        amigos.push({ nome: nome, mensagem: "" });
-        localStorage.setItem("amigosLista", JSON.stringify(amigos));
-        document.getElementById("novoAmigo").value = "";
-        mostrarAmigos();
-    }
-    window.adicionarAmigo = adicionarAmigo;
-
-    function atualizarMensagem(index, texto){
-        let amigos = JSON.parse(localStorage.getItem("amigosLista")) || [];
-        amigos[index].mensagem = texto;
-        localStorage.setItem("amigosLista", JSON.stringify(amigos));
-    }
-
-    function mostrarAmigos(){
-        let amigos = JSON.parse(localStorage.getItem("amigosLista")) || [];
-        let div = document.getElementById("listaAmigos");
-        div.innerHTML = "";
-        amigos.forEach((amigo, index) => {
-            let box = document.createElement("div");
+            // Card do amigo
+            const box = document.createElement("div");
             box.className = "amigo";
-            let nome = document.createElement("h4");
+
+            const nome = document.createElement("h4");
             nome.textContent = amigo.nome;
-            let area = document.createElement("textarea");
-            area.placeholder = "Escreva algo para " + amigo.nome + "...";
-            area.value = amigo.mensagem;
-            area.oninput = () => atualizarMensagem(index, area.value);
+
+            const area = document.createElement("textarea");
+            area.placeholder = "Escreva algo...";
+            area.value = amigo.comentario || "";
+
+            const botao = document.createElement("button");
+            botao.textContent = "Publicar";
+            botao.onclick = async () => {
+                await updateDoc(doc(db, "amigos", docSnap.id), { comentario: area.value });
+            };
+
             box.appendChild(nome);
             box.appendChild(area);
+            box.appendChild(botao);
+            listaDiv.appendChild(box);
+
+            // Mostrar comentário publicado
+            if (amigo.comentario) {
+                const coment = document.createElement("div");
+                coment.className = "comentario";
+                coment.innerHTML = `<b>${amigo.nome}:</b> ${amigo.comentario}`;
+                comentariosDiv.appendChild(coment);
+            }
+        });
+    });
+}
+
+/* ======== COMENTÁRIOS TEXTO DIÁRIO ======== */
+window.salvarComentario = async function(){
+    const nome = document.getElementById("nome").value.trim();
+    const texto = document.getElementById("comentario").value.trim();
+    if(!nome || !texto) return alert("Preencha todos os campos!");
+    await addDoc(collection(db, "comentarios"), { autor: nome, comentario: texto, data: new Date().toLocaleString() });
+    document.getElementById("comentario").value = "";
+}
+
+function mostrarComentarios(){
+    const div = document.getElementById("listaComentarios");
+    const q = query(collection(db, "comentarios"), orderBy("data"));
+    onSnapshot(q, (snapshot) => {
+        div.innerHTML = "";
+        snapshot.forEach((docSnap) => {
+            const item = docSnap.data();
+            const box = document.createElement("div");
+            box.className = "comentario";
+            box.innerHTML = `<b>${item.autor}:</b> ${item.comentario}<br><small>${item.data}</small>`;
             div.appendChild(box);
         });
-    }
+    });
+}
 
-    window.onload = () => {
-        mostrarAmigos();
-        mostrarComentarios(); // agora em tempo real via Firebase
-    };
+/* ======== INICIALIZAÇÃO ======== */
+window.onload = async () => {
+    await inicializarAmigos();
+    mostrarAmigos();
+    mostrarComentarios();
+};
 </script>
-
 </body>
 </html>
