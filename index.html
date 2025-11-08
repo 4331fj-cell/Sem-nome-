@@ -1,348 +1,190 @@
 <!DOCTYPE html>
 <html lang="pt">
 <head>
-<meta charset="UTF-8">
-<title>Amigos da BBS</title>
-
-<style>
-    :root {
-        --fundo: #ffffff;
-        --caixa: #ffffff;
-        --texto: #1a1a1a;
-        --azul: #1a4d8f;
-        --comentario: #e9eef5;
-        --botaovermelho: #c62828;
-    }
-
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Amigos & Comentários</title>
+  <style>
     body {
-        font-family: Arial, Helvetica, sans-serif;
-        background: linear-gradient(#ffffff, #e5edf7); /* estilo jw.org */
-        margin: 0;
-        padding: 0;
-        color: var(--texto);
-        transition: 0.3s;
+      margin: 0;
+      font-family: Arial, sans-serif;
+      /* Fundo inspirado no jw.org: tons suaves de azul */
+      background: linear-gradient(#e9f2fa, #c9ddf1);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
-
+    header {
+      background: #00589f;
+      color: white;
+      padding: 16px;
+      text-align: center;
+      font-size: 1.4rem;
+    }
     nav {
-        background: var(--azul);
-        padding: 12px;
-        display: flex;
-        justify-content: center;
-        gap: 25px;
+      display: flex;
+      background: #f5f5f5;
+      border-bottom: 1px solid #ddd;
     }
-
-    nav a {
-        color: white;
-        text-decoration: none;
-        font-weight: bold;
-        cursor: pointer;
+    nav button {
+      flex: 1;
+      padding: 12px;
+      cursor: pointer;
+      border: none;
+      background: #f5f5f5;
+      font-size: 1rem;
     }
-
-    .container {
-        max-width: 900px;
-        margin: auto;
-        background: var(--caixa);
-        padding: 25px;
-        margin-top: 30px;
-        border-radius: 12px;
-        box-shadow: 0 0 15px rgba(0,0,0,0.10);
-        animation: aparecer 0.5s ease;
+    nav button.active {
+      background: white;
+      border-bottom: 3px solid #00589f;
+      font-weight: bold;
     }
-
-    @keyframes aparecer {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
+    .tab {
+      display: none;
+      padding: 20px;
+      flex: 1;
     }
-
-    h2 { color: var(--azul); }
-
-    .amigo-box {
-        background: #e9eef5;
-        padding: 12px;
-        border-radius: 8px;
-        margin-top: 8px;
+    .tab.active {
+      display: block;
     }
-
-    input, textarea, button {
-        width: 100%;
-        border-radius: 6px;
-        padding: 10px;
-        margin-top: 8px;
+    .friend-item {
+      padding: 8px 0;
+      border-bottom: 1px solid #ccc;
+      cursor: pointer;
+      color: #00589f;
     }
-
-    button {
-        background: var(--azul);
-        color: white;
-        border: none;
-        cursor: pointer;
+    textarea, input {
+      width: 100%;
+      padding: 8px;
+      margin: 6px 0;
     }
-
-    .comentario {
-        background: var(--comentario);
-        padding: 12px;
-        border-radius: 8px;
-        margin-top: 10px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
+    .card {
+      background: white;
+      padding: 12px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
-
-    .comentario button {
-        background: var(--botaovermelho);
-        width: auto;
-    }
-</style>
+  </style>
 </head>
 <body>
+  <header>Site de Amigos & Comentários</header>
 
-<nav>
-    <a onclick="mostrarHome()">Home</a>
-    <a onclick="mostrarAmigos()">Amigos</a>
-    <a onclick="mostrarComentarios()">Comentários</a>
-</nav>
+  <nav>
+    <button id="tabAmigosBtn" class="active">Amigos</button>
+    <button id="tabComentariosBtn">Comentários</button>
+  </nav>
 
-<div class="container">
+  <!-- Aba Amigos -->
+  <div id="tabAmigos" class="tab active">
+    <h2>Lista de Amigos</h2>
+    <div id="listaAmigos"></div>
 
-    <!-- HOME: amigos + comentários -->
-    <div id="sec_home">
+    <h3>Adicionar novo amigo</h3>
+    <input type="text" id="novoNome" placeholder="Nome do amigo" />
+    <button onclick="adicionarAmigo()">Adicionar</button>
 
-        <h2>Amigos</h2>
-        <div id="lista_amigos"></div>
-
-        <hr><br>
-
+    <div id="perfilAmigo" style="display:none; margin-top:20px;">
+      <h3 id="perfilNome"></h3>
+      <textarea id="perfilTexto" rows="4" placeholder="Escreva algo sobre você..."></textarea>
+      <button onclick="salvarPerfil()">Salvar</button>
     </div>
+  </div>
 
-    <!-- SOMENTE AMIGOS -->
-    <div id="sec_amigos" style="display:none;">
-        <h2>Amigos</h2>
-        <div id="lista_amigos2"></div>
-    </div>
+  <!-- Aba Comentários -->
+  <div id="tabComentarios" class="tab">
+    <h2>Comentários sobre o Texto Diário</h2>
+    <textarea id="novoComentario" rows="3" placeholder="Escreva seu comentário..."></textarea>
+    <button onclick="adicionarComentario()">Comentar</button>
+    <div id="listaComentarios" style="margin-top:20px;"></div>
+  </div>
 
-    <!-- SOMENTE COMENTÁRIOS -->
- <h2>Comentários sobre o Texto Diário</h2>
-<p>Leia o texto diário no site oficial:<br>
-<a href="https://www.jw.org" target="_blank">Aceder ao texto diário oficial</a></p>
-
-<textarea id="comentario" placeholder="Escreva o seu comentário aqui..."></textarea>
-<button id="btnPublicar">Guardar</button>
-
-<div id="listaComentarios"></div>
-
-<script type="module">
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-app.js";
-  import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/10.14.0/firebase-firestore.js";
-
-
-  // 👀 Mostrar comentários em tempo real
-  const q = query(comentariosRef, orderBy("data", "asc"));
-  onSnapshot(q, snapshot => {
-    const div = document.getElementById("listaComentarios");
-    div.innerHTML = "";
-    snapshot.forEach(doc => {
-      const c = doc.data();
-      const p = document.createElement("p");
-      p.textContent = "• " + c.texto;
-      div.appendChild(p);
-    });
-  });
-</script>
-
-<script>
-// --------- LISTA DE AMIGOS (editável) ---------
-const amigos = [
-    "Laudir",
-    "Bryan",
-    "Tomás",
-    "Victor",
-    "Gabriel",
-    "Leoniro",
-    "Áquila",
-    "António",
-    "Sem nome",
-    "Sem nome"
-];
-
-// Mostrar lista com botões
-function mostrarAmigosLista(id){
-    let div = document.getElementById(id);
-    div.innerHTML = "";
-
-    amigos.forEach(nome => {
-        let box = document.createElement("div");
-        box.className = "amigo-box";
-        box.innerHTML = `
-            ${nome}
-            <button style="float:right; padding:5px;" onclick="abrirMensagens('${nome}')">Abrir</button>
-        `;
-        div.appendChild(box);
-    });
-}
-
-// --------- ÁREA DE MENSAGENS DE CADA AMIGO ---------
-
-function abrirMensagens(nome) {
-    const container = document.querySelector(".container");
-
-    container.innerHTML = `
-        <h2>Mensagens de ${nome}</h2>
-        
-        <textarea id="msgTexto" placeholder="Escreve uma mensagem..."></textarea>
-        <button onclick="guardarMensagem('${nome}')">Guardar</button>
-
-        <h3>Mensagens anteriores:</h3>
-        <div id="lista_msg"></div>
-
-        <br><button onclick="voltarHome()">Voltar</button>
-    `;
-
-    mostrarMensagens(nome);
-}
-
-function guardarMensagem(nome){
-    let texto = document.getElementById("msgTexto").value.trim();
-    if(!texto) return;
-
-    let chave = "mensagens_" + nome; 
-    let lista = JSON.parse(localStorage.getItem(chave)) || [];
-    lista.push(texto);
-    localStorage.setItem(chave, JSON.stringify(lista));
-
-    document.getElementById("msgTexto").value = "";
-    mostrarMensagens(nome);
-}
-
-function mostrarMensagens(nome){
-    let chave = "mensagens_" + nome;
-    let lista = JSON.parse(localStorage.getItem(chave)) || [];
-    let div = document.getElementById("lista_msg");
-    div.innerHTML = "";
-
-    lista.forEach((texto, i) => {
-        let box = document.createElement("div");
-        box.className = "comentario";
-        box.innerHTML = `
-            <span>${texto}</span>
-            <button onclick="apagarMsg('${nome}', ${i})">Apagar</button>
-        `;
-        div.appendChild(box);
-    });
-}
-
-function apagarMsg(nome, index){
-    let chave = "mensagens_" + nome;
-    let lista = JSON.parse(localStorage.getItem(chave)) || [];
-    lista.splice(index,1);
-    localStorage.setItem(chave, JSON.stringify(lista));
-    mostrarMensagens(nome);
-}
-
-function voltarHome(){
-    window.location.reload();
-}
-
-// --------- COMENTÁRIOS GERAIS ---------
-function salvarComentario(){
-    let nome = document.getElementById("nome").value.trim();
-    let texto = document.getElementById("comentario").value.trim();
-    if(!nome || !texto) return;
-
-    let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
-    lista.push({autor:nome, comentario:texto});
-    localStorage.setItem("comentariosDiarios", JSON.stringify(lista));
-
-    mostrarComentarios();
-    document.getElementById("comentario").value = "";
-}
-
-function salvarComentario2(){
-    let nome = document.getElementById("nome2").value.trim();
-    let texto = document.getElementById("comentario2").value.trim();
-    if(!nome || !texto) return;
-
-    let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
-    lista.push({autor:nome, comentario:texto});
-    localStorage.setItem("comentariosDiarios", JSON.stringify(lista));
-
-    mostrarComentarios();
-    document.getElementById("comentario2").value = "";
-}
-
-function apagarComentario(i){
-    let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
-    lista.splice(i,1);
-    localStorage.setItem("comentariosDiarios", JSON.stringify(lista));
-    mostrarComentarios();
-}
-
-function mostrarComentarios(){
-    let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
-    let div1 = document.getElementById("listaComentarios");
-    let div2 = document.getElementById("listaComentarios2");
-    
-    div1.innerHTML = "";
-    div2.innerHTML = "";
-
-    lista.forEach((item, i) => {
-        let box = document.createElement("div");
-        box.className = "comentario";
-        box.innerHTML = `<span><b>${item.autor}:</b> ${item.comentario}</span>
-                         <button onclick="apagarComentario(${i})">Apagar</button>`;
-        div1.appendChild(box);
-        
-        let box2 = box.cloneNode(true);
-        div2.appendChild(box2);
-    });
-}
-
-// --------- TROCA DE ABAS ---------
-function mostrarHome(){
-    document.getElementById("sec_home").style.display = "block";
-    document.getElementById("sec_amigos").style.display = "none";
-    document.getElementById("sec_comentarios").style.display = "none";
-}
-
-function mostrarAmigos(){
-    document.getElementById("sec_home").style.display = "none";
-    document.getElementById("sec_amigos").style.display = "block";
-    document.getElementById("sec_comentarios").style.display = "none";
-}
-
-function mostrarComentarios(){
-    document.getElementById("sec_home").style.display = "none";
-    document.getElementById("sec_amigos").style.display = "none";
-    document.getElementById("sec_comentarios").style.display = "block";
-}
-
-window.onload = () => {
-    mostrarAmigosLista("lista_amigos");
-    mostrarAmigosLista("lista_amigos2");
-    mostrarComentarios();
+  <script>
+    // Configuração do Firebase
+// 1. Substitua com as chaves do seu projeto Firebase
+const firebaseConfig = {
+  apiKey: "AIzaSyB72aG4EcSHVrwnXK36uF9qJsfTvOfR9lw",
+  authDomain: "meus-amigos-site.firebaseapp.com",
+  projectId: "meus-amigos-site",
+  storageBucket: "meus-amigos-site.firebasestorage.app",
+  messagingSenderId: "1000729709619",
+  appId: "1:1000729709619:web:1ace7b814a12f65f2c6746",
+  measurementId: "G-Q3DB1WBKLW"
 };
 
-</script>
-<script type="module">
-  // Import the functions you need from the SDKs you need
-  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-app.js";
-  import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.5.0/firebase-analytics.js";
-  // TODO: Add SDKs for Firebase products that you want to use
-  // https://firebase.google.com/docs/web/setup#available-libraries
+// Inicializar Firebase
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-  // Your web app's Firebase configuration
-  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-  const firebaseConfig = {
-    apiKey: "AIzaSyB72aG4EcSHVrwnXK36uF9qJsfTvOfR9lw",
-    authDomain: "meus-amigos-site.firebaseapp.com",
-    projectId: "meus-amigos-site",
-    storageBucket: "meus-amigos-site.firebasestorage.app",
-    messagingSenderId: "1000729709619",
-    appId: "1:1000729709619:web:1ace7b814a12f65f2c6746",
-    measurementId: "G-Q3DB1WBKLW"
-  };
+let amigoAtual = null;
 
-  // Initialize Firebase
-  const app = initializeApp(firebaseConfig);
-  const analytics = getAnalytics(app);
-</script>
+function renderAmigos() {
+  const lista = document.getElementById('listaAmigos');
+  lista.innerHTML = '';
+  db.collection('amigos').get().then(snapshot => {
+    snapshot.forEach(doc => {
+      const amigo = doc.data();
+      const div = document.createElement('div');
+      div.className = 'friend-item';
+      div.textContent = amigo.nome;
+      div.onclick = () => abrirPerfil(doc.id, amigo);
+      lista.appendChild(div);
+    });
+  });
+}
+
+function adicionarAmigo() {
+  const nome = document.getElementById('novoNome').value.trim();
+  if(!nome) return;
+  db.collection('amigos').add({ nome, texto: '' })
+    .then(() => {
+      renderAmigos();
+      document.getElementById('novoNome').value = '';
+    });
+}
+
+function abrirPerfil(id, amigo) {
+  amigoAtual = id;
+  document.getElementById('perfilNome').textContent = amigo.nome;
+  document.getElementById('perfilTexto').value = amigo.texto;
+  document.getElementById('perfilAmigo').style.display = 'block';
+}
+
+function salvarPerfil() {
+  if(!amigoAtual) return;
+  const texto = document.getElementById('perfilTexto').value;
+  db.collection('amigos').doc(amigoAtual).update({ texto })
+    .then(() => alert('Perfil salvo!'));
+}
+
+function renderComentarios() {
+  const lista = document.getElementById('listaComentarios');
+  lista.innerHTML = '';
+  db.collection('comentarios').orderBy('data','asc').get().then(snapshot => {
+    snapshot.forEach(doc => {
+      const c = doc.data().texto;
+      const card = document.createElement('div');
+      card.className = 'card';
+      card.textContent = c;
+      lista.appendChild(card);
+    });
+  });
+}
+
+function adicionarComentario() {
+  const texto = document.getElementById('novoComentario').value.trim();
+  if(!texto) return;
+  db.collection('comentarios').add({ texto, data: Date.now() }).then(() => {
+    renderComentarios();
+    document.getElementById('novoComentario').value = '';
+  });
+}
+
+// Render inicial
+renderAmigos();
+renderComentarios();
+    renderAmigos();
+    renderComentarios();
+  </script>
 </body>
 </html>
