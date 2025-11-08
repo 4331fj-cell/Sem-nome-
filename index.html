@@ -2,11 +2,10 @@
 <html lang="pt">
 <head>
 <meta charset="UTF-8">
-<title>Amigos da verdade</title>
+<title>Amigos da Verdade</title>
 
 <style>
     :root {
-        /* tema claro */
         --fundo: #f0f4f8;
         --caixa: #ffffff;
         --texto: #1a1a1a;
@@ -16,7 +15,6 @@
     }
 
     body.escuro {
-        /* tema escuro */
         --fundo: #1b1e23;
         --caixa: #2b2f36;
         --texto: #f1f1f1;
@@ -32,7 +30,6 @@
         transition: 0.3s;
     }
 
-    /* MENU */
     nav {
         background: var(--azul);
         padding: 12px;
@@ -48,9 +45,9 @@
         color: white;
         text-decoration: none;
         font-weight: bold;
+        cursor: pointer;
     }
 
-    /* container principal */
     .container {
         max-width: 900px;
         margin: auto;
@@ -118,7 +115,6 @@
         background: #8e1d1d;
     }
 
-    /* botão modo escuro */
     #modo {
         cursor: pointer;
         background: white;
@@ -127,32 +123,74 @@
         padding: 6px 12px;
         border: none;
     }
+
+    /* amigos */
+    .amigo {
+        background: var(--comentario);
+        border-radius: 10px;
+        padding: 15px;
+        margin-top: 10px;
+    }
+
+    .amigo h4 {
+        margin: 0 0 8px 0;
+        color: var(--azul);
+    }
+
+    .mensagem {
+        font-style: italic;
+        margin-top: 5px;
+    }
+
+    .secao {
+        display: none;
+    }
+
+    .ativa {
+        display: block;
+    }
 </style>
 </head>
 <body>
 
 <nav>
-    <a href="#">Amigos</a>
-    <a href="#">Comentários</a>
+    <a onclick="mostrarSecao('amigos')">Amigos</a>
+    <a onclick="mostrarSecao('comentarios')">Comentários</a>
     <button id="modo" onclick="alternarTema()">Dark Mode</button>
 </nav>
 
 <div class="container">
 
-    <h2>Comentários sobre o Texto Diário</h2>
-    <p>Leia o texto diário no site oficial:<br>
-    <a href="https://www.jw.org" target="_blank">Aceder ao texto diário oficial</a></p>
+    <!-- Seção Amigos -->
+    <div id="amigos" class="secao ativa">
+        <h2>Meus Amigos</h2>
+        <div id="listaAmigos"></div>
+        <input id="novoAmigo" type="text" placeholder="Nome do novo amigo">
+        <button onclick="adicionarAmigo()">Adicionar Amigo</button>
+    </div>
 
-    <input id="nome" type="text" placeholder="Seu nome">
-    <textarea id="comentario" placeholder="Escreva o seu comentário..."></textarea>
-    <button onclick="salvarComentario()">Publicar comentário</button>
+    <!-- Seção Comentários -->
+    <div id="comentarios" class="secao">
+        <h2>Comentários sobre o Texto Diário</h2>
+        <p>Leia o texto diário no site oficial:<br>
+        <a href="https://www.jw.org" target="_blank">Aceder ao texto diário oficial</a></p>
 
-    <h3 style="margin-top:20px;">Comentários anteriores:</h3>
-    <div id="listaComentarios"></div>
+        <input id="nome" type="text" placeholder="Seu nome">
+        <textarea id="comentario" placeholder="Escreva o seu comentário..."></textarea>
+        <button onclick="salvarComentario()">Publicar comentário</button>
+
+        <h3 style="margin-top:20px;">Comentários anteriores:</h3>
+        <div id="listaComentarios"></div>
+    </div>
 
 </div>
 
 <script>
+function mostrarSecao(id){
+    document.querySelectorAll(".secao").forEach(sec => sec.classList.remove("ativa"));
+    document.getElementById(id).classList.add("ativa");
+}
+
 function salvarComentario(){
     let nome = document.getElementById("nome").value.trim();
     let texto = document.getElementById("comentario").value.trim();
@@ -160,11 +198,9 @@ function salvarComentario(){
     if(nome.length == 0 || texto.length == 0) return;
 
     let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
+    let data = new Date().toLocaleString();
 
-    let data = new Date();
-    let dia = data.toLocaleDateString() + " " + data.toLocaleTimeString();
-
-    lista.push({ autor: nome, comentario: texto, data: dia });
+    lista.push({ autor: nome, comentario: texto, data });
     localStorage.setItem("comentariosDiarios", JSON.stringify(lista));
 
     mostrarComentarios();
@@ -173,9 +209,7 @@ function salvarComentario(){
 
 function apagarComentario(index){
     let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
-    let confirmar = confirm("Tem certeza que deseja apagar?");
-    if(!confirmar) return;
-
+    if(!confirm("Tem certeza que deseja apagar?")) return;
     lista.splice(index, 1);
     localStorage.setItem("comentariosDiarios", JSON.stringify(lista));
     mostrarComentarios();
@@ -185,19 +219,14 @@ function mostrarComentarios(){
     let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
     let div = document.getElementById("listaComentarios");
     div.innerHTML = "";
-
     lista.forEach((item, index) => {
         let box = document.createElement("div");
         box.className = "comentario";
-
         let texto = document.createElement("span");
-        texto.innerHTML = "<b>" + item.autor + ":</b> " + item.comentario + 
-                          "<br><small>" + item.data + "</small>";
-
+        texto.innerHTML = "<b>" + item.autor + ":</b> " + item.comentario + "<br><small>" + item.data + "</small>";
         let botao = document.createElement("button");
         botao.textContent = "Apagar";
         botao.onclick = () => apagarComentario(index);
-
         box.appendChild(texto);
         box.appendChild(botao);
         div.appendChild(box);
@@ -210,7 +239,50 @@ function alternarTema(){
     botao.textContent = document.body.classList.contains("escuro") ? "Light Mode" : "Dark Mode";
 }
 
-window.onload = mostrarComentarios;
+/* -------- SEÇÃO AMIGOS -------- */
+
+function adicionarAmigo(){
+    let nome = document.getElementById("novoAmigo").value.trim();
+    if(nome.length === 0) return;
+    let amigos = JSON.parse(localStorage.getItem("amigosLista")) || [];
+    amigos.push({ nome: nome, mensagem: "" });
+    localStorage.setItem("amigosLista", JSON.stringify(amigos));
+    document.getElementById("novoAmigo").value = "";
+    mostrarAmigos();
+}
+
+function atualizarMensagem(index, texto){
+    let amigos = JSON.parse(localStorage.getItem("amigosLista")) || [];
+    amigos[index].mensagem = texto;
+    localStorage.setItem("amigosLista", JSON.stringify(amigos));
+}
+
+function mostrarAmigos(){
+    let amigos = JSON.parse(localStorage.getItem("amigosLista")) || [];
+    let div = document.getElementById("listaAmigos");
+    div.innerHTML = "";
+    amigos.forEach((amigo, index) => {
+        let box = document.createElement("div");
+        box.className = "amigo";
+
+        let nome = document.createElement("h4");
+        nome.textContent = amigo.nome;
+
+        let area = document.createElement("textarea");
+        area.placeholder = "Escreva algo para " + amigo.nome + "...";
+        area.value = amigo.mensagem;
+        area.oninput = () => atualizarMensagem(index, area.value);
+
+        box.appendChild(nome);
+        box.appendChild(area);
+        div.appendChild(box);
+    });
+}
+
+window.onload = function(){
+    mostrarComentarios();
+    mostrarAmigos();
+};
 </script>
 
 </body>
