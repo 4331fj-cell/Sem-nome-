@@ -212,16 +212,14 @@ async function inicializarAmigos() {
 // Mostrar amigos com campo de comentário
 function mostrarAmigos() {
     const listaDiv = document.getElementById("listaAmigos");
-    const comentariosDiv = document.getElementById("comentariosAmigos");
     const q = query(collection(db, "amigos"), orderBy("nome"));
-    onSnapshot(q, (snapshot) => {
-        listaDiv.innerHTML = "";
-        comentariosDiv.innerHTML = "";
 
-        snapshot.forEach(docSnap => {
+    // Listener em tempo real
+    onSnapshot(q, snapshot => {
+        listaDiv.innerHTML = ""; // <-- limpa antes de adicionar
+
+        snapshot.docs.forEach(docSnap => {
             const amigo = docSnap.data();
-
-            // Card do amigo
             const box = document.createElement("div");
             box.className = "amigo";
 
@@ -241,18 +239,20 @@ function mostrarAmigos() {
             box.appendChild(nome);
             box.appendChild(area);
             box.appendChild(botao);
-            listaDiv.appendChild(box);
 
-            // Mostrar comentário publicado
+            // Mostrar comentário existente
             if (amigo.comentario) {
                 const coment = document.createElement("div");
                 coment.className = "comentario";
                 coment.innerHTML = `<b>${amigo.nome}:</b> ${amigo.comentario}`;
-                comentariosDiv.appendChild(coment);
+                box.appendChild(coment);
             }
+
+            listaDiv.appendChild(box);
         });
     });
 }
+
 
 /* ======== COMENTÁRIOS TEXTO DIÁRIO ======== */
 window.salvarComentario = async function(){
