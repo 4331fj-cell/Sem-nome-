@@ -167,13 +167,13 @@ import {
 
 // Configuração Firebase 🔥
 const firebaseConfig = {
-  apiKey: "AIzaSyB72aG4EcSHVrwnXK36uF9qJsfTvOfR9lw",
-  authDomain: "meus-amigos-site.firebaseapp.com",
-  projectId: "meus-amigos-site",
-  storageBucket: "meus-amigos-site.firebasestorage.app",
-  messagingSenderId: "1000729709619",
-  appId: "1:1000729709619:web:1ace7b814a12f65f2c6746",
-  measurementId: "G-Q3DB1WBKLW"
+    apiKey: "AIzaSyB72aG4EcSHVrwnXK36uF9qJsfTvOfR9lw",
+    authDomain: "meus-amigos-site.firebaseapp.com",
+    projectId: "meus-amigos-site",
+    storageBucket: "meus-amigos-site.firebasestorage.app",
+    messagingSenderId: "1000729709619",
+    appId: "1:1000729709619:web:1ace7b814a12f65f2c6746",
+    measurementId: "G-Q3DB1WBKLW"
 };
 
 const app = initializeApp(firebaseConfig);
@@ -193,7 +193,7 @@ window.mostrarSecao = function(id){
 }
 
 /* ======== AMIGOS ======== */
-const amigosFixos = ["Áquila", "Leoniro", "António", "Victor", "Bryan", "Tomás"];
+const amigosFixos = ["Laudir", "João", "Maria", "Pedro", "Áquila"];
 
 // Criar amigos se não existirem
 async function inicializarAmigos() {
@@ -212,14 +212,16 @@ async function inicializarAmigos() {
 // Mostrar amigos com campo de comentário
 function mostrarAmigos() {
     const listaDiv = document.getElementById("listaAmigos");
+    const comentariosDiv = document.getElementById("comentariosAmigos");
     const q = query(collection(db, "amigos"), orderBy("nome"));
+    onSnapshot(q, (snapshot) => {
+        listaDiv.innerHTML = "";
+        comentariosDiv.innerHTML = "";
 
-    // Listener em tempo real
-    onSnapshot(q, snapshot => {
-        listaDiv.innerHTML = ""; // <-- limpa antes de adicionar
-
-        snapshot.docs.forEach(docSnap => {
+        snapshot.forEach(docSnap => {
             const amigo = docSnap.data();
+
+            // Card do amigo
             const box = document.createElement("div");
             box.className = "amigo";
 
@@ -239,20 +241,18 @@ function mostrarAmigos() {
             box.appendChild(nome);
             box.appendChild(area);
             box.appendChild(botao);
+            listaDiv.appendChild(box);
 
-            // Mostrar comentário existente
+            // Mostrar comentário publicado
             if (amigo.comentario) {
                 const coment = document.createElement("div");
                 coment.className = "comentario";
                 coment.innerHTML = `<b>${amigo.nome}:</b> ${amigo.comentario}`;
-                box.appendChild(coment);
+                comentariosDiv.appendChild(coment);
             }
-
-            listaDiv.appendChild(box);
         });
     });
 }
-
 
 /* ======== COMENTÁRIOS TEXTO DIÁRIO ======== */
 window.salvarComentario = async function(){
