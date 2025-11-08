@@ -195,19 +195,6 @@ window.mostrarSecao = function(id){
 /* ======== AMIGOS ======== */
 const amigosFixos = ["Laudir", "João", "Maria", "Pedro", "Áquila"];
 
-// Criar amigos se não existirem
-async function inicializarAmigos() {
-    const q = query(collection(db, "amigos"));
-    const amigosRef = collection(db, "amigos");
-    let existentes = [];
-    onSnapshot(q, snapshot => existentes = snapshot.docs.map(d => d.data().nome));
-
-    for (const nome of amigosFixos) {
-        if (!existentes.includes(nome)) {
-            await addDoc(amigosRef, { nome, comentario: "" });
-        }
-    }
-}
 
 // Mostrar amigos com campo de comentário
 function mostrarAmigos() {
