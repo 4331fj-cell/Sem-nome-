@@ -124,7 +124,9 @@
         border: none;
     }
 
-    /* amigos */
+    .secao { display: none; }
+    .ativa { display: block; }
+
     .amigo {
         background: var(--comentario);
         border-radius: 10px;
@@ -135,19 +137,6 @@
     .amigo h4 {
         margin: 0 0 8px 0;
         color: var(--azul);
-    }
-
-    .mensagem {
-        font-style: italic;
-        margin-top: 5px;
-    }
-
-    .secao {
-        display: none;
-    }
-
-    .ativa {
-        display: block;
     }
 </style>
 </head>
@@ -185,104 +174,127 @@
 
 </div>
 
-<script>
-function mostrarSecao(id){
-    document.querySelectorAll(".secao").forEach(sec => sec.classList.remove("ativa"));
-    document.getElementById(id).classList.add("ativa");
-}
+<!-- SDKs do Firebase -->
+<script type="module">
+    // Importa os módulos necessários do Firebase (versão modular moderna)
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
+    import { getFirestore, collection, addDoc, onSnapshot, deleteDoc, doc, query, orderBy } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-function salvarComentario(){
-    let nome = document.getElementById("nome").value.trim();
-    let texto = document.getElementById("comentario").value.trim();
-
-    if(nome.length == 0 || texto.length == 0) return;
-
-    let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
-    let data = new Date().toLocaleString();
-
-    lista.push({ autor: nome, comentario: texto, data });
-    localStorage.setItem("comentariosDiarios", JSON.stringify(lista));
-
-    mostrarComentarios();
-    document.getElementById("comentario").value = "";
-}
-
-function apagarComentario(index){
-    let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
-    if(!confirm("Tem certeza que deseja apagar?")) return;
-    lista.splice(index, 1);
-    localStorage.setItem("comentariosDiarios", JSON.stringify(lista));
-    mostrarComentarios();
-}
-
-function mostrarComentarios(){
-    let lista = JSON.parse(localStorage.getItem("comentariosDiarios")) || [];
-    let div = document.getElementById("listaComentarios");
-    div.innerHTML = "";
-    lista.forEach((item, index) => {
-        let box = document.createElement("div");
-        box.className = "comentario";
-        let texto = document.createElement("span");
-        texto.innerHTML = "<b>" + item.autor + ":</b> " + item.comentario + "<br><small>" + item.data + "</small>";
-        let botao = document.createElement("button");
-        botao.textContent = "Apagar";
-        botao.onclick = () => apagarComentario(index);
-        box.appendChild(texto);
-        box.appendChild(botao);
-        div.appendChild(box);
-    });
-}
-
-function alternarTema(){
-    document.body.classList.toggle("escuro");
-    let botao = document.getElementById("modo");
-    botao.textContent = document.body.classList.contains("escuro") ? "Light Mode" : "Dark Mode";
-}
-
-/* -------- SEÇÃO AMIGOS -------- */
-
-function adicionarAmigo(){
-    let nome = document.getElementById("novoAmigo").value.trim();
-    if(nome.length === 0) return;
-    let amigos = JSON.parse(localStorage.getItem("amigosLista")) || [];
-    amigos.push({ nome: nome, mensagem: "" });
-    localStorage.setItem("amigosLista", JSON.stringify(amigos));
-    document.getElementById("novoAmigo").value = "";
-    mostrarAmigos();
-}
-
-function atualizarMensagem(index, texto){
-    let amigos = JSON.parse(localStorage.getItem("amigosLista")) || [];
-    amigos[index].mensagem = texto;
-    localStorage.setItem("amigosLista", JSON.stringify(amigos));
-}
-
-function mostrarAmigos(){
-    let amigos = JSON.parse(localStorage.getItem("amigosLista")) || [];
-    let div = document.getElementById("listaAmigos");
-    div.innerHTML = "";
-    amigos.forEach((amigo, index) => {
-        let box = document.createElement("div");
-        box.className = "amigo";
-
-        let nome = document.createElement("h4");
-        nome.textContent = amigo.nome;
-
-        let area = document.createElement("textarea");
-        area.placeholder = "Escreva algo para " + amigo.nome + "...";
-        area.value = amigo.mensagem;
-        area.oninput = () => atualizarMensagem(index, area.value);
-
-        box.appendChild(nome);
-        box.appendChild(area);
-        div.appendChild(box);
-    });
-}
-
-window.onload = function(){
-    mostrarComentarios();
-    mostrarAmigos();
+    // CONFIGURAÇÃO DO FIREBASE  🔥 (substitua pelos seus dados)
+   const firebaseConfig = {
+  apiKey: "AIzaSyB72aG4EcSHVrwnXK36uF9qJsfTvOfR9lw",
+  authDomain: "meus-amigos-site.firebaseapp.com",
+  projectId: "meus-amigos-site",
+  storageBucket: "meus-amigos-site.firebasestorage.app",
+  messagingSenderId: "1000729709619",
+  appId: "1:1000729709619:web:1ace7b814a12f65f2c6746",
+  measurementId: "G-Q3DB1WBKLW"
 };
+
+    // Inicializa Firebase e Firestore
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    /* ======== FUNÇÕES DO SITE ======== */
+
+    // alternar entre as seções
+    window.mostrarSecao = function(id){
+        document.querySelectorAll(".secao").forEach(sec => sec.classList.remove("ativa"));
+        document.getElementById(id).classList.add("ativa");
+    }
+
+    // modo escuro
+    window.alternarTema = function(){
+        document.body.classList.toggle("escuro");
+        let botao = document.getElementById("modo");
+        botao.textContent = document.body.classList.contains("escuro") ? "Light Mode" : "Dark Mode";
+    }
+
+    /* ---------- SEÇÃO DE COMENTÁRIOS (Firebase) ---------- */
+
+    async function salvarComentario(){
+        const nome = document.getElementById("nome").value.trim();
+        const texto = document.getElementById("comentario").value.trim();
+        if(!nome || !texto) return alert("Preencha todos os campos!");
+
+        await addDoc(collection(db, "comentarios"), {
+            autor: nome,
+            comentario: texto,
+            data: new Date().toLocaleString()
+        });
+
+        document.getElementById("comentario").value = "";
+    }
+    window.salvarComentario = salvarComentario;
+
+    async function apagarComentario(id){
+        if(!confirm("Tem certeza que deseja apagar?")) return;
+        await deleteDoc(doc(db, "comentarios", id));
+    }
+
+    function mostrarComentarios(){
+        const div = document.getElementById("listaComentarios");
+        const q = query(collection(db, "comentarios"), orderBy("data"));
+        onSnapshot(q, (snapshot) => {
+            div.innerHTML = "";
+            snapshot.forEach((docSnap) => {
+                const item = docSnap.data();
+                const box = document.createElement("div");
+                box.className = "comentario";
+                const texto = document.createElement("span");
+                texto.innerHTML = `<b>${item.autor}:</b> ${item.comentario}<br><small>${item.data}</small>`;
+                const botao = document.createElement("button");
+                botao.textContent = "Apagar";
+                botao.onclick = () => apagarComentario(docSnap.id);
+                box.appendChild(texto);
+                box.appendChild(botao);
+                div.appendChild(box);
+            });
+        });
+    }
+
+    /* ---------- SEÇÃO AMIGOS (ainda local) ---------- */
+
+    function adicionarAmigo(){
+        let nome = document.getElementById("novoAmigo").value.trim();
+        if(nome.length === 0) return;
+        let amigos = JSON.parse(localStorage.getItem("amigosLista")) || [];
+        amigos.push({ nome: nome, mensagem: "" });
+        localStorage.setItem("amigosLista", JSON.stringify(amigos));
+        document.getElementById("novoAmigo").value = "";
+        mostrarAmigos();
+    }
+    window.adicionarAmigo = adicionarAmigo;
+
+    function atualizarMensagem(index, texto){
+        let amigos = JSON.parse(localStorage.getItem("amigosLista")) || [];
+        amigos[index].mensagem = texto;
+        localStorage.setItem("amigosLista", JSON.stringify(amigos));
+    }
+
+    function mostrarAmigos(){
+        let amigos = JSON.parse(localStorage.getItem("amigosLista")) || [];
+        let div = document.getElementById("listaAmigos");
+        div.innerHTML = "";
+        amigos.forEach((amigo, index) => {
+            let box = document.createElement("div");
+            box.className = "amigo";
+            let nome = document.createElement("h4");
+            nome.textContent = amigo.nome;
+            let area = document.createElement("textarea");
+            area.placeholder = "Escreva algo para " + amigo.nome + "...";
+            area.value = amigo.mensagem;
+            area.oninput = () => atualizarMensagem(index, area.value);
+            box.appendChild(nome);
+            box.appendChild(area);
+            div.appendChild(box);
+        });
+    }
+
+    window.onload = () => {
+        mostrarAmigos();
+        mostrarComentarios(); // agora em tempo real via Firebase
+    };
 </script>
 
 </body>
