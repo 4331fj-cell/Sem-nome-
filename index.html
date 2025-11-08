@@ -167,6 +167,7 @@ window.mostrarSecao = function(id){
 // ✅ AMIGOS FIXOS
 const amigosFixos = ["Laudir", "Leoniro", "Bryan", "Victor", "Áquila"];
 
+// AMIGOS FIXOS
 async function mostrarAmigos(){
     const listaDiv = document.getElementById("listaAmigos");
     const comentariosDiv = document.getElementById("comentariosAmigos");
@@ -174,7 +175,6 @@ async function mostrarAmigos(){
     comentariosDiv.innerHTML = "";
 
     amigosFixos.forEach(nome => {
-        // Card do amigo
         const box = document.createElement("div");
         box.className = "amigo";
         box.innerHTML = `<h4>${nome}</h4>`;
@@ -198,24 +198,24 @@ async function mostrarAmigos(){
         listaDiv.appendChild(box);
     });
 
-    // Ler comentários em tempo real
     const q = query(collection(db, "amigos"), orderBy("nome"));
     onSnapshot(q, (snapshot) => {
         comentariosDiv.innerHTML = "";
         snapshot.forEach(docSnap => {
             const item = docSnap.data();
-            if(item.comentario && item.comentario.trim() !== ""){
+            const id = docSnap.id;  // ✅ Aqui temos o ID correto
+            if(item.comentario){
                 const coment = document.createElement("div");
                 coment.className = "comentario";
+
                 coment.innerHTML = `<div><b>${item.nome}:</b> ${item.comentario}<br><small>${item.data}</small></div>`;
 
-                // botão de apagar
                 const apagar = document.createElement("button");
                 apagar.className = "apagar";
                 apagar.textContent = "🗑️ Apagar";
                 apagar.onclick = async () => {
                     if(confirm(`Apagar comentário de ${item.nome}?`)){
-                        await deleteDoc(doc(db, "amigos", item.nome));
+                        await deleteDoc(doc(db, "amigos", id));  // ✅ Agora apaga
                     }
                 };
 
@@ -238,17 +238,40 @@ window.salvarComentario = async function(){
 function mostrarComentarios(){
     const div = document.getElementById("listaComentarios");
     const q = query(collection(db, "comentarios"), orderBy("data"));
+
     onSnapshot(q, (snapshot) => {
         div.innerHTML = "";
+
         snapshot.forEach((docSnap) => {
             const item = docSnap.data();
+            const id = docSnap.id; // ✅ guardar ID
+
             const box = document.createElement("div");
             box.className = "comentario";
-            box.innerHTML = `<b>${item.autor}:</b> ${item.comentario}<br><small>${item.data}</small>`;
+
+            box.innerHTML = `
+                <div>
+                    <b>${item.autor}:</b> ${item.comentario}<br>
+                    <small>${item.data}</small>
+                </div>
+            `;
+
+            // ✅ botão apagar
+            const apagar = document.createElement("button");
+            apagar.className = "apagar";
+            apagar.textContent = "🗑️ Apagar";
+            apagar.onclick = async () => {
+                if(confirm(`Apagar comentário de ${item.autor}?`)){
+                    await deleteDoc(doc(db, "comentarios", id)); // ✅ agora apaga o certo
+                }
+            };
+
+            box.appendChild(apagar);
             div.appendChild(box);
         });
     });
 }
+
 
 window.onload = () => {
     mostrarAmigos();
