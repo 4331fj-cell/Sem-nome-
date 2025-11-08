@@ -10,7 +10,6 @@
         --texto: #1a1a1a;
         --azul: #1a4d8f;
         --comentario: #e9eef5;
-        --botaovermelho: #c62828;
     }
 
     body.escuro {
@@ -21,7 +20,7 @@
     }
 
     body {
-        font-family: Arial, Helvetica, sans-serif;
+        font-family: Arial;
         background: linear-gradient(135deg, var(--fundo), #d7e1ec);
         margin: 0;
         padding: 0;
@@ -40,43 +39,25 @@
         align-items: center;
     }
 
-    nav a {
-        color: white;
-        text-decoration: none;
-        font-weight: bold;
-        cursor: pointer;
-    }
+    nav a { color: white; font-weight: bold; cursor: pointer; text-decoration: none; }
 
     .container {
         max-width: 900px;
-        margin: auto;
         background: var(--caixa);
+        margin: 30px auto;
         padding: 25px;
-        margin-top: 30px;
         border-radius: 12px;
-        box-shadow: 0 0 15px rgba(0,0,0,0.10);
-        animation: aparecer 0.6s ease;
+        box-shadow: 0 0 15px rgba(0,0,0,0.1);
     }
 
-    @keyframes aparecer {
-        from { opacity: 0; transform: translateY(20px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
+    h2 { color: var(--azul); border-bottom: 2px solid var(--azul); padding-bottom: 5px; }
 
-    h2 {
-        color: var(--azul);
-        border-bottom: 2px solid var(--azul);
-        padding-bottom: 5px;
-    }
-
-    input, textarea {
+    textarea {
         width: 100%;
+        padding: 10px;
         border: 1px solid #bbb;
         border-radius: 6px;
-        padding: 10px;
-        margin-top: 8px;
         margin-bottom: 10px;
-        font-size: 15px;
     }
 
     button {
@@ -85,20 +66,23 @@
         border: none;
         border-radius: 6px;
         padding: 10px;
-        font-size: 15px;
         cursor: pointer;
+        transition: 0.2s;
     }
 
-    button:hover { background: #163e75; }
+    button:hover { opacity: 0.85; }
+
+    .apagar {
+        background: #c62828;
+        margin-left: 10px;
+    }
 
     .amigo {
         background: var(--comentario);
-        border-radius: 10px;
         padding: 15px;
+        border-radius: 10px;
         margin-top: 10px;
     }
-
-    .amigo h4 { margin: 0 0 8px 0; color: var(--azul); }
 
     .comentario {
         background: var(--comentario);
@@ -108,16 +92,6 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        animation: aparecer 0.4s ease;
-    }
-
-    #modo {
-        cursor: pointer;
-        background: white;
-        color: black;
-        border-radius: 20px;
-        padding: 6px 12px;
-        border: none;
     }
 
     .secao { display: none; }
@@ -142,10 +116,10 @@
         <div id="comentariosAmigos"></div>
     </div>
 
-    <!-- Seção Comentários sobre o texto diário -->
+    <!-- Comentários do Texto Diário -->
     <div id="comentarios" class="secao">
         <h2>Comentários sobre o Texto Diário</h2>
-        <p>Leia o texto diário no site oficial:<br>
+        <p>Leia o texto diário:<br>
         <a href="https://www.jw.org" target="_blank">Aceder ao texto diário oficial</a></p>
 
         <input id="nome" type="text" placeholder="Seu nome">
@@ -158,104 +132,101 @@
 
 </div>
 
-<!-- Firebase -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-app.js";
 import { 
-    getFirestore, collection, addDoc, doc, updateDoc, onSnapshot, query, orderBy 
+    getFirestore, collection, addDoc, doc, setDoc, deleteDoc, onSnapshot, query, orderBy 
 } from "https://www.gstatic.com/firebasejs/11.0.1/firebase-firestore.js";
 
-// Configuração Firebase 🔥
+// 🔥 Configuração Firebase
 const firebaseConfig = {
-    apiKey: "AIzaSyB72aG4EcSHVrwnXK36uF9qJsfTvOfR9lw",
-    authDomain: "meus-amigos-site.firebaseapp.com",
-    projectId: "meus-amigos-site",
-    storageBucket: "meus-amigos-site.firebasestorage.app",
-    messagingSenderId: "1000729709619",
-    appId: "1:1000729709619:web:1ace7b814a12f65f2c6746",
-    measurementId: "G-Q3DB1WBKLW"
+  apiKey: "AIzaSyB72aG4EcSHVrwnXK36uF9qJsfTvOfR9lw",
+  authDomain: "meus-amigos-site.firebaseapp.com",
+  projectId: "meus-amigos-site",
+  storageBucket: "meus-amigos-site.firebasestorage.app",
+  messagingSenderId: "1000729709619",
+  appId: "1:1000729709619:web:1ace7b814a12f65f2c6746",
+  measurementId: "G-Q3DB1WBKLW"
 };
 
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Alternar tema
+// Tema
 window.alternarTema = function(){
     document.body.classList.toggle("escuro");
     let botao = document.getElementById("modo");
     botao.textContent = document.body.classList.contains("escuro") ? "Light Mode" : "Dark Mode";
-}
+};
 
-// Mostrar seções
 window.mostrarSecao = function(id){
     document.querySelectorAll(".secao").forEach(s => s.classList.remove("ativa"));
     document.getElementById(id).classList.add("ativa");
-}
+};
 
-/* ======== AMIGOS ======== */
-const amigosFixos = ["Laudir", "João", "Maria", "Pedro", "Áquila"];
+// ✅ AMIGOS FIXOS
+const amigosFixos = ["Laudir", "Leoniro", "Bryan", "Victor", "Áquila"];
 
-    // Criar amigos se não existirem
-async function inicializarAmigos() {
-    const q = query(collection(db, "amigos"));
-    const amigosRef = collection(db, "amigos");
-    let existentes = [];
-    onSnapshot(q, snapshot => existentes = snapshot.docs.map(d => d.data().nome));
-
-    for (const nome of amigosFixos) {
-        if (!existentes.includes(nome)) {
-            await addDoc(amigosRef, { nome, comentario: "" });
-        }
-    }
-}
-
-
-// Mostrar amigos com campo de comentário
-function mostrarAmigos() {
+async function mostrarAmigos(){
     const listaDiv = document.getElementById("listaAmigos");
     const comentariosDiv = document.getElementById("comentariosAmigos");
+    listaDiv.innerHTML = "";
+    comentariosDiv.innerHTML = "";
+
+    amigosFixos.forEach(nome => {
+        // Card do amigo
+        const box = document.createElement("div");
+        box.className = "amigo";
+        box.innerHTML = `<h4>${nome}</h4>`;
+
+        const area = document.createElement("textarea");
+        area.placeholder = "Escreva algo...";
+
+        const botao = document.createElement("button");
+        botao.textContent = "Publicar";
+        botao.onclick = async () => {
+            await setDoc(doc(db, "amigos", nome), {
+                nome: nome,
+                comentario: area.value,
+                data: new Date().toLocaleString()
+            });
+            area.value = "";
+        };
+
+        box.appendChild(area);
+        box.appendChild(botao);
+        listaDiv.appendChild(box);
+    });
+
+    // Ler comentários em tempo real
     const q = query(collection(db, "amigos"), orderBy("nome"));
     onSnapshot(q, (snapshot) => {
-        listaDiv.innerHTML = "";
         comentariosDiv.innerHTML = "";
-
         snapshot.forEach(docSnap => {
-            const amigo = docSnap.data();
-
-            // Card do amigo
-            const box = document.createElement("div");
-            box.className = "amigo";
-
-            const nome = document.createElement("h4");
-            nome.textContent = amigo.nome;
-
-            const area = document.createElement("textarea");
-            area.placeholder = "Escreva algo...";
-            area.value = amigo.comentario || "";
-
-            const botao = document.createElement("button");
-            botao.textContent = "Publicar";
-            botao.onclick = async () => {
-                await updateDoc(doc(db, "amigos", docSnap.id), { comentario: area.value });
-            };
-
-            box.appendChild(nome);
-            box.appendChild(area);
-            box.appendChild(botao);
-            listaDiv.appendChild(box);
-
-            // Mostrar comentário publicado
-            if (amigo.comentario) {
+            const item = docSnap.data();
+            if(item.comentario && item.comentario.trim() !== ""){
                 const coment = document.createElement("div");
                 coment.className = "comentario";
-                coment.innerHTML = `<b>${amigo.nome}:</b> ${amigo.comentario}`;
+                coment.innerHTML = `<div><b>${item.nome}:</b> ${item.comentario}<br><small>${item.data}</small></div>`;
+
+                // botão de apagar
+                const apagar = document.createElement("button");
+                apagar.className = "apagar";
+                apagar.textContent = "🗑️ Apagar";
+                apagar.onclick = async () => {
+                    if(confirm(`Apagar comentário de ${item.nome}?`)){
+                        await deleteDoc(doc(db, "amigos", item.nome));
+                    }
+                };
+
+                coment.appendChild(apagar);
                 comentariosDiv.appendChild(coment);
             }
         });
     });
 }
 
-/* ======== COMENTÁRIOS TEXTO DIÁRIO ======== */
+// ✅ COMENTÁRIOS DO TEXTO DIÁRIO
 window.salvarComentario = async function(){
     const nome = document.getElementById("nome").value.trim();
     const texto = document.getElementById("comentario").value.trim();
@@ -279,9 +250,7 @@ function mostrarComentarios(){
     });
 }
 
-/* ======== INICIALIZAÇÃO ======== */
-window.onload = async () => {
-    await inicializarAmigos();
+window.onload = () => {
     mostrarAmigos();
     mostrarComentarios();
 };
